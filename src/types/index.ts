@@ -5,15 +5,17 @@ export interface MessageType {
   id: string
   role: RoleType
   content: string
-  timestamp: Date
+  timestamp: string
+  like?: boolean
+  dislike?: boolean
   isTyping?: boolean
 }
 
 export interface ChatType {
   id: string
   title: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 export interface PresetType {

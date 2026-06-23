@@ -13,7 +13,6 @@ const updateCookies = (token: string, userId: string) => {
 
 const syncLocalChat = async () => {
   const localChats = loadGuestChats()
-
   if(localChats.length > 0) {
     const chats = localChats?.map((chat: any) => {
       return {
@@ -23,14 +22,17 @@ const syncLocalChat = async () => {
     }) || []
     let messages = []
     
-    const localMessages = loadAllGuestMessages() as any
-    for (const key in localMessages) {
-      const mes = localMessages[key]
-      messages.push({
-        chatId: key,
-        content: mes?.title,
-        createdAt: mes?.createdAt
-      })
+    const localMessages = loadAllGuestMessages()
+    for (const chatId in localMessages) {
+      for (const msg of (localMessages[chatId] ?? [])) {
+        messages.push({
+          chatId,
+          content: msg.content,
+          createdAt: msg.timestamp,
+          like: msg.like,
+          dislike: msg.dislike,
+        })
+      }
     }
     await chatApi.syncLocalChat(chats, messages)
   }

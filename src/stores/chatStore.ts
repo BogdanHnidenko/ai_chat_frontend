@@ -2,17 +2,19 @@ import { defineStore } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
 import type { ChatType, MessageType } from '@/types'
-import { Chat } from '@/api/API'
+import { Chat, Message } from '@/api/API'
 import { useI18n } from '@/i18n'
 import {
   loadGuestChats,
   loadGuestMessages,
   upsertGuestChat,
   appendGuestMessage,
-  updateGuestMessage
+  updateGuestMessage,
+  deleteGuestChat
 } from '@/modules/localChatManager'
 
 const api = new Chat
+const messageApi = new Message
 
 function getChatLabels() {
   const { t } = useI18n()
@@ -49,7 +51,7 @@ export const useChatStore = defineStore('chat', {
       const labels = getChatLabels()
 
       for (const chat of state.chats) {
-        const diff = now - chat.updatedAt?.getTime()
+        const diff = now - new Date(chat.updatedAt).getTime()
         let label: string
         if (diff < DAY) label = labels.today
         else if (diff < DAY * 2) label = labels.yesterday
@@ -67,6 +69,7 @@ export const useChatStore = defineStore('chat', {
   actions: {
     async setActiveChat(id: string, isGuest = false) {
       if (this.activeChatId === id) return
+      if (this.isStreaming) return
       this.activeChatId = id
 
       this.chats.forEach(c => {
@@ -74,7 +77,6 @@ export const useChatStore = defineStore('chat', {
           this.messages.delete(c.id)
         }
       })
-
 
       if (this.pendingChat?.id === id) return
 
@@ -96,7 +98,7 @@ export const useChatStore = defineStore('chat', {
 
       this.isLoadingMessages = true
       try {
-        const msgs = await api.getMessagesFromChat(chatId) as unknown as MessageType[]
+        const msgs = await messageApi.getMessages(chatId) as unknown as MessageType[]
         this.messages.set(chatId, msgs)
       } finally {
         this.isLoadingMessages = false
@@ -120,42 +122,41 @@ export const useChatStore = defineStore('chat', {
       const chat: ChatType = {
         id: crypto.randomUUID(),
         title: getChatLabels().newChatTitle,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
       this.messages.set(chat.id, [])
       this.pendingChat = chat
       this.activeChatId = chat.id
     },
 
-    addMessage(chatId: string, message: MessageType) {
-      if (this.pendingChat?.id === chatId) {
-        
-        this.chats.unshift(this.pendingChat)
-        this.pendingChat = null
-        if (useAuthStore().isGuest) upsertGuestChat(this.chats[0]!)
-      }
+    createChatFromPending(chat: ChatType) {
+      this.chats.unshift(chat)
+      this.activeChatId = chat.id
+      if (useAuthStore().isGuest && this.pendingChat) upsertGuestChat(this.pendingChat)
+      this.pendingChat = null
+    },
+
+    async addMessage(chatId: string, message: MessageType) {
       const chat = this.chats.find(c => c.id === chatId)
       if (!chat) return
-      if(useAuthStore().isGuest) {
-        appendGuestMessage(chatId, message)
-      }
+      if(useAuthStore().isGuest) appendGuestMessage(chatId, message)
 
       const msgs = this.messages.get(chatId) ?? []
       msgs.push(message)
       this.messages.set(chatId, msgs)
-      chat.updatedAt = new Date()
+      chat.updatedAt = new Date().toISOString()
     },
 
     appendStreamChunk(chatId: string, messageId: string, chunk: string) {
-      const msgs = this.messages.get(chatId)
-      if (!msgs) return
       const chat = this.chats.find(c => c.id === chatId)
       if (!chat) return
+      const msgs = this.messages.get(chatId)
+      if (!msgs) return
       const msg = msgs.find(m => m.id === messageId)
       if (!msg) return
       msg.content += chunk
-      chat.updatedAt = new Date()
+      chat.updatedAt = new Date().toISOString()
 
       if(useAuthStore().isGuest) {
         updateGuestMessage(chatId, msg.id, msg.content)
@@ -174,18 +175,40 @@ export const useChatStore = defineStore('chat', {
         return
       }
 
-      await api.deleteChat(chatId)
+      if (useAuthStore().isGuest) {
+        deleteGuestChat(chatId)
+      } else {
+        await api.deleteChat(chatId)
+      }
 
       if (this.activeChatId === chatId) {
         const idx = this.chats.findIndex(c => c.id === chatId)
         const next = this.chats[idx - 1] ?? this.chats[idx + 1] ?? null
         this.activeChatId = next?.id ?? null
-        if (next) this.loadMessages(next.id)
+        if (next) await this.loadMessages(next.id, useAuthStore().isGuest)
       }
 
       const idx = this.chats.findIndex(c => c.id === chatId)
       if (idx !== -1) this.chats.splice(idx, 1)
       this.messages.delete(chatId)
+    },
+
+    async reactToMessage(chatId: string, messageId: string, reaction: 'like' | 'dislike') {
+      const msgs = this.messages.get(chatId)
+      if (!msgs) return
+      const msg = msgs.find(m => m.id === messageId)
+      if (!msg) return
+
+      const wasActive = msg[reaction]
+      msg.like = false
+      msg.dislike = false
+      if (!wasActive) msg[reaction] = true
+
+      if (!useAuthStore().isGuest) {
+        await messageApi.react(chatId, messageId, msg.like ?? null, msg.dislike ?? null)
+      } else {
+        updateGuestMessage(chatId, messageId, msg.content, msg.like, msg.dislike)
+      }
     },
 
     async renameChat(chatId: string, title: string) {

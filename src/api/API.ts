@@ -28,7 +28,7 @@ http.interceptors.response.use(
     const data = response.data as any
     if (data?.status === 'error' && data?.error === 'no auth') {
       handleAuthError()
-      return
+      return Promise.reject(new Error('no auth'))
     } else if(data?.status !== 'done') {
       return Promise.reject()
     }
@@ -99,13 +99,10 @@ export class Presets {
 
 export class Chat {
   syncLocalChat(chats: any, messages: any) {
-    return http.post<unknown[]>(`/api/chats/`, { chats, messages })
+    return http.post<unknown[]>(`/api/chats/sync`, { chats, messages })
   }
-  createChat() {
-    return http.post<unknown[]>(`/api/chats/`)
-  }
-  getMessagesFromChat(id: string) {
-    return http.get<unknown[]>(`/api/chats/${id}`)
+  createChat(chat: any) {
+    return http.post<unknown[]>(`/api/chats/`, chat)
   }
   renameChat(id: string, title: string) {
     return http.put<unknown[]>(`/api/chats/${id}`, { title })
@@ -115,3 +112,14 @@ export class Chat {
   }
 }
 
+export class Message {
+  createMessage(chatId: string, message: string) {
+    return http.post<unknown[]>(`/api/message/${chatId}`, { message })
+  }
+  getMessages(id: string) {
+    return http.get<unknown[]>(`/api/message/${id}`)
+  }
+  react(chatId: string, messageId: string, like: boolean | null, dislike: boolean | null) {
+    return http.patch<unknown[]>(`/api/message/${chatId}/${messageId}/react`, { like, dislike })
+  }
+}

@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { usePresetStore } from '@/stores/presetStore'
 import router from '@/router'
 import { GetStart } from '@/api/API'
+import { guestHadChat } from '@/modules/localChatManager'
 
 const api = new GetStart
 
@@ -20,8 +21,8 @@ const setCurrentData = (auth: any, chatStore: any, presetStore: any, data: any =
     chatStore.chats = chats.map((c: any) => ({
       id: c.id,
       title: c.title,
-      createdAt: new Date(c.createdAt),
-      updatedAt: new Date(c.updatedAt),
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
     }))
   }
 }
@@ -34,7 +35,7 @@ export default async () => {
   if (auth.isGuest) {
     auth.loginAsGuest()
     chatStore.loadGuestChatsIntoStore()
-    if (chatStore.chats.length === 0) chatStore.createChat()
+    if (chatStore.chats.length === 0 && !guestHadChat()) chatStore.createChat()
     router.replace('/chats')
     return
   }

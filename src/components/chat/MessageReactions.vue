@@ -1,9 +1,19 @@
 <template>
   <div class="reactions">
-    <button class="reaction-btn" :class="{ active: liked === true }" @click="liked = liked === true ? null : true" :title="t.reactions.like">
+    <button
+      class="reaction-btn"
+      :class="{ active: message.like }"
+      @click="react('like')"
+      :title="t.reactions.like"
+    >
       <SvgIcon iconName="thumbUp" :size="13" />
     </button>
-    <button class="reaction-btn" :class="{ active: liked === false }" @click="liked = liked === false ? null : false" :title="t.reactions.dislike">
+    <button
+      class="reaction-btn"
+      :class="{ active: message.dislike }"
+      @click="react('dislike')"
+      :title="t.reactions.dislike"
+    >
       <SvgIcon iconName="thumbDown" :size="13" />
     </button>
     <button class="reaction-btn" @click="copy" :title="t.reactions.copy">
@@ -14,14 +24,23 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { MessageType } from '@/types'
 import SvgIcon from '@/components/ui/SvgIcon.vue'
 import { useI18n } from '@/i18n'
+import { useChatStore } from '@/stores/chatStore'
 
-const liked = ref<boolean | null>(null)
+const props = defineProps<{ message: MessageType; chatId: string }>()
+
 const { t } = useI18n()
+const chatStore = useChatStore()
 const copied = ref(false)
 
+function react(reaction: 'like' | 'dislike') {
+  chatStore.reactToMessage(props.chatId, props.message.id, reaction)
+}
+
 function copy() {
+  navigator.clipboard.writeText(props.message.content)
   copied.value = true
   setTimeout(() => (copied.value = false), 1500)
 }

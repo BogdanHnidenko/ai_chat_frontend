@@ -128,6 +128,7 @@ export default {
     login: 'Log in',
     messageLimitTitle: 'Message limit reached',
     messageLimitMessage: 'In demo mode you can send only 3 messages per chat. Log in to continue.',
+    noChatMessage: 'Demo limit reached. Log in to continue chatting.',
   },
 
   chatDeleted: {
@@ -139,6 +140,7 @@ export default {
   confirmDelete: {
     chatTitle: 'Delete chat?',
     chatMessage: 'This action cannot be undone. The chat and all messages will be deleted.',
+    chatGuestMessage: 'The chat will be deleted. To create a new chat, you will need to log in.',
     presetTitle: 'Delete preset?',
     presetMessage: 'This action cannot be undone.',
     cancel: 'Cancel',

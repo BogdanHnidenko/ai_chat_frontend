@@ -128,6 +128,7 @@ export default {
     login: 'Se connecter',
     messageLimitTitle: 'Limite de messages atteinte',
     messageLimitMessage: 'En mode démo, vous pouvez envoyer seulement 3 messages par chat. Connectez-vous pour continuer.',
+    noChatMessage: 'Limite démo atteinte. Connectez-vous pour continuer à discuter.',
   },
 
   chatDeleted: {
@@ -139,6 +140,7 @@ export default {
   confirmDelete: {
     chatTitle: 'Supprimer le chat ?',
     chatMessage: 'Cette action est irréversible. Le chat et tous les messages seront supprimés.',
+    chatGuestMessage: 'Le chat sera supprimé. Pour créer un nouveau chat, vous devrez vous connecter.',
     presetTitle: 'Supprimer le préréglage ?',
     presetMessage: 'Cette action est irréversible.',
     cancel: 'Annuler',

@@ -128,6 +128,7 @@ export default {
     login: 'Anmelden',
     messageLimitTitle: 'Nachrichtenlimit erreicht',
     messageLimitMessage: 'Im Demo-Modus kannst du nur 3 Nachrichten pro Chat senden. Melde dich an, um fortzufahren.',
+    noChatMessage: 'Demo-Limit erreicht. Melde dich an, um weiter zu chatten.',
   },
 
   chatDeleted: {
@@ -139,6 +140,7 @@ export default {
   confirmDelete: {
     chatTitle: 'Chat löschen?',
     chatMessage: 'Diese Aktion kann nicht rückgängig gemacht werden. Der Chat und alle Nachrichten werden gelöscht.',
+    chatGuestMessage: 'Der Chat wird gelöscht. Um einen neuen Chat zu erstellen, musst du dich anmelden.',
     presetTitle: 'Vorlage löschen?',
     presetMessage: 'Diese Aktion kann nicht rückgängig gemacht werden.',
     cancel: 'Abbrechen',

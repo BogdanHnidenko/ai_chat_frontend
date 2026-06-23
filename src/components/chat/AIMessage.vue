@@ -11,7 +11,7 @@
       <TypingIndicator v-if="message.isTyping" />
       <div v-else>
         <div class="markdown" v-html="html" />
-        <MessageReactions />
+        <MessageReactions :message="message" :chatId="chatStore.activeChatId!" />
       </div>
     </div>
   </div>
@@ -19,13 +19,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Message } from '@/types'
+import type { MessageType } from '@/types'
 import AILogo from '@/components/ui/AILogo.vue'
 import TypingIndicator from './TypingIndicator.vue'
 import MessageReactions from './MessageReactions.vue'
 import { useMarkdown } from '@/composables/useMarkdown'
+import { useChatStore } from '@/stores/chatStore'
 
-const props = defineProps<{ message: Message; index: number }>()
+const props = defineProps<{ message: MessageType; index: number }>()
+const chatStore = useChatStore()
 const { render } = useMarkdown()
 
 const html = computed(() => render(props.message.content))

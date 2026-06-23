@@ -1,18 +1,26 @@
 <template>
   <div class="demo-limit-banner">
-    <span>{{ t.demoLimit.messageLimitMessage }}</span>
+    <span>{{ message }}</span>
     <button class="banner-login-btn" @click="loginOpen = true">{{ t.demoLimit.login }}</button>
   </div>
   <LoginModal v-model="loginOpen" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useChatStore } from '@/stores/chatStore'
 import { useI18n } from '@/i18n'
 import LoginModal from '@/components/ui/LoginModal.vue'
 
 const { t } = useI18n()
+const chatStore = useChatStore()
 const loginOpen = ref(false)
+
+const message = computed(() =>
+  chatStore.activeChat
+    ? t.value.demoLimit.messageLimitMessage
+    : t.value.demoLimit.noChatMessage
+)
 </script>
 
 <style scoped>

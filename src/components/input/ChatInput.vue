@@ -33,6 +33,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useAutoResize } from '@/composables/useAutoResize'
 import { useI18n } from '@/i18n'
 import { streamChatMessage, stopStreaming } from '@/api/streamingApi'
+import { guestHadChat } from '@/modules/localChatManager'
 import SendButton from './SendButton.vue'
 import DemoLimitMesage from './DemoLimitMesage.vue'
 
@@ -47,7 +48,7 @@ const inputText = ref('')
 
 const demoLimitOpen = computed(() => {
   if (!auth.isGuest) return false
-  if (!chatStore.activeChat) return false
+  if (!chatStore.activeChat) return guestHadChat()
   const userMessages = chatStore.activeMessages.filter(m => m.role === 'user')
   return userMessages.length >= DEMO_MESSAGE_LIMIT
 })

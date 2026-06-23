@@ -11,7 +11,7 @@
   >
     <button
       class="chat-item"
-      :class="{ active }"
+      :class="{ active, streaming: chatStore.isStreaming && !active }"
       @click="$emit('click')"
     >
       <span class="chat-title">{{ chat.title }}</span>
@@ -41,12 +41,10 @@
       @confirm="submitRename"
     />
 
-    <LoginModal v-model="loginOpen" />
-
     <ConfirmModal
       v-model="confirmDeleteOpen"
       :title="t.confirmDelete.chatTitle"
-      :message="t.confirmDelete.chatMessage"
+      :message="auth.isGuest ? t.confirmDelete.chatGuestMessage : t.confirmDelete.chatMessage"
       @confirm="confirmDelete"
     />
 
@@ -68,7 +66,6 @@ import { ref } from 'vue'
 import type { ChatType } from '@/types'
 import ChatMenu from '@/components/ui/ChatMenu.vue'
 import RenameModal from '@/components/ui/RenameModal.vue'
-import LoginModal from '@/components/ui/LoginModal.vue'
 import ConfirmModal from '@/components/ui/ConfirmModal.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import SvgIcon from '@/components/ui/SvgIcon.vue'
@@ -91,7 +88,6 @@ const menuVisible = ref(false)
 const menuX = ref(0)
 const menuY = ref(0)
 const renaming = ref(false)
-const loginOpen = ref(false)
 const confirmDeleteOpen = ref(false)
 
 function openMenuAt(x: number, y: number) {
@@ -115,10 +111,6 @@ function submitRename(name: string) {
 
 function onDelete() {
   closeMenu()
-  if (auth.isGuest) {
-    loginOpen.value = true
-    return
-  }
   confirmDeleteOpen.value = true
 }
 
@@ -178,6 +170,13 @@ function onTouchMove() {
 }
 .chat-item:hover {
   background: rgba(255, 255, 255, 0.04);
+}
+.chat-item.streaming {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.chat-item.streaming:hover {
+  background: none;
 }
 .chat-item.active {
   background: rgba(255, 255, 255, 0.08);

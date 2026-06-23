@@ -2,18 +2,26 @@ import type { ChatType, MessageType } from '@/types'
 
 const GUEST_CHATS_KEY = 'guest_chats'
 const GUEST_MESSAGES_KEY = 'guest_messages'
+const GUEST_HAD_CHAT_KEY = 'guest_had_chat'
+
+export function markGuestHadChat(): void {
+  localStorage.setItem(GUEST_HAD_CHAT_KEY, '1')
+}
+
+export function guestHadChat(): boolean {
+  return localStorage.getItem(GUEST_HAD_CHAT_KEY) === '1'
+}
+
+export function clearGuestHadChat(): void {
+  localStorage.removeItem(GUEST_HAD_CHAT_KEY)
+}
 
 // ── Chats ─────────────────────────────────────────────────────────────────────
 
 export function loadGuestChats(): ChatType[] {
   try {
     const raw = localStorage.getItem(GUEST_CHATS_KEY)
-    if (!raw) return []
-    return (JSON.parse(raw) as any[]).map(c => ({
-      ...c,
-      createdAt: new Date(c.createdAt),
-      updatedAt: new Date(c.updatedAt),
-    }))
+    return raw ? JSON.parse(raw) : []
   } catch {
     return []
   }
@@ -27,6 +35,7 @@ export function upsertGuestChat(chat: ChatType): void {
   const chats = loadGuestChats()
   chats.push(chat)
   saveGuestChats(chats)
+  markGuestHadChat()
 }
 
 // ── Messages ──────────────────────────────────────────────────────────────────
@@ -46,13 +55,10 @@ function saveAllGuestMessages(messages: Record<string, MessageType[]>): void {
 
 export function loadGuestMessages(chatId: string): MessageType[] {
   const all = loadAllGuestMessages()
-  return (all[chatId] ?? []).map((m: any) => ({
-    ...m,
-    timestamp: new Date(m.timestamp),
-  }))
+  return all[chatId] ?? []
 }
 
-export function updateGuestMessage(chatId: string, messageId: string, content: string): void {
+export function updateGuestMessage(chatId: string, messageId: string, content: string, like: boolean | null = null, dislike: boolean | null = null): void {
   const all = loadAllGuestMessages()
   const msgs = all[chatId]
   if (!msgs) return
@@ -60,6 +66,8 @@ export function updateGuestMessage(chatId: string, messageId: string, content: s
   if (!msg) return
   msg.content = content
   msg.isTyping = false
+  if (like !== null) msg.like = like
+  if (dislike !== null) msg.dislike = dislike
   saveAllGuestMessages(all)
 
   const chats = loadGuestChats()
@@ -87,9 +95,19 @@ export function appendGuestMessage(chatId: string, message: MessageType): void {
 }
 
 
+export function deleteGuestChat(chatId: string): void {
+  const chats = loadGuestChats().filter(c => c.id !== chatId)
+  saveGuestChats(chats)
+
+  const all = loadAllGuestMessages()
+  delete all[chatId]
+  saveAllGuestMessages(all)
+}
+
 // ── Bulk clear ────────────────────────────────────────────────────────────────
 
 export function clearAllGuestData(): void {
   localStorage.removeItem(GUEST_CHATS_KEY)
   localStorage.removeItem(GUEST_MESSAGES_KEY)
+  clearGuestHadChat()
 }

@@ -50,6 +50,7 @@ import { useChatStore } from '@/stores/chatStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/i18n'
+import { guestHadChat } from '@/modules/localChatManager'
 import ChatList from '@/components/sidebar/ChatList.vue'
 import UserProfile from '@/components/sidebar/UserProfile.vue'
 import SearchModal from '@/components/sidebar/SearchModal.vue'
@@ -68,7 +69,7 @@ const demoNewChatOpen = ref(false)
 const loginOpen = ref(false)
 
 function createNewChat() {
-  if (auth.isGuest) {
+  if (auth.isGuest || guestHadChat()) {
     demoNewChatOpen.value = true
     return
   }
