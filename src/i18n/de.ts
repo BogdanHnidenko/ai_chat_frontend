@@ -23,6 +23,7 @@ export default {
     loginTitle: 'Anmelden',
     loginSubmit: 'Anmelden',
     errorInvalidCredentials: 'Ungültige E-Mail oder Passwort',
+    errorUserNotFound: 'Benutzer nicht gefunden. Bitte zuerst registrieren.',
   },
 
   sidebar: {
@@ -79,6 +80,7 @@ export default {
     register: 'Registrieren',
     errorName: 'Bitte gib deinen Namen ein',
     errorPassword: 'Passwort ist zu kurz',
+    errorUserNotFound: 'Benutzer nicht gefunden. Bitte zuerst registrieren.',
   },
 
   input: {

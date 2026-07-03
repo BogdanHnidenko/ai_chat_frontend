@@ -6,7 +6,7 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     sidebarOpen: true,
     theme: 'dark' as ThemeType,
-    language: "uk",
+    language: pendingLang.value,
     showChatDeletedModal: false,
   }),
   actions: {

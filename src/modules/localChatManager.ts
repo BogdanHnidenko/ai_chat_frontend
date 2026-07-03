@@ -95,6 +95,14 @@ export function appendGuestMessage(chatId: string, message: MessageType): void {
 }
 
 
+export function updateGuestChatTitle(chatId: string, title: string): void {
+  const chats = loadGuestChats()
+  const chat = chats.find(c => c.id === chatId)
+  if (!chat) return
+  chat.title = title
+  saveGuestChats(chats)
+}
+
 export function deleteGuestChat(chatId: string): void {
   const chats = loadGuestChats().filter(c => c.id !== chatId)
   saveGuestChats(chats)

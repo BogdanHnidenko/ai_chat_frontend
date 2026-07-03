@@ -25,6 +25,7 @@ export default {
     loginTitle: 'Вхід',
     loginSubmit: 'Увійти',
     errorInvalidCredentials: 'Невірний email або пароль',
+    errorUserNotFound: 'Користувача не знайдено. Спочатку зареєструйтесь.',
   },
 
   // Sidebar
@@ -88,6 +89,7 @@ export default {
     register: 'Зареєструватися',
     errorName: "Введіть ім'я",
     errorPassword: 'Пароль занадто короткий',
+    errorUserNotFound: 'Користувача не знайдено. Спочатку зареєструйтесь.',
   },
 
   // ChatInput

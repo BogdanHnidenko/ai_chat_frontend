@@ -10,6 +10,7 @@ import {
   upsertGuestChat,
   appendGuestMessage,
   updateGuestMessage,
+  updateGuestChatTitle,
   deleteGuestChat
 } from '@/modules/localChatManager'
 
@@ -165,6 +166,13 @@ export const useChatStore = defineStore('chat', {
 
     setStreaming(val: boolean) {
       this.isStreaming = val
+    },
+
+    setChatTitle(chatId: string, title: string) {
+      const chat = this.chats.find(c => c.id === chatId)
+      if (!chat) return
+      chat.title = title
+      if (useAuthStore().isGuest) updateGuestChatTitle(chatId, title)
     },
 
     async deleteChat(chatId: string) {

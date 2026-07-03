@@ -66,6 +66,7 @@ import { useAuthStore } from '@/stores/authStore'
 import AILogo from '@/components/ui/AILogo.vue'
 import { login, register } from '@/modules/auth'
 import getStart from '@/modules/getStart'
+import { API_ERRORS } from '@/helpers/apiErrors'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -107,8 +108,16 @@ async function submit() {
       await register({ name: nameVal, email: emailVal, password: passwordVal })
     }
     await getStart()
-  } catch (e: unknown) {
-
+  } catch (e: any) {
+    if (isLogin.value) {
+      if (e?.message === API_ERRORS.USER_NOT_FOUND) {
+        error.value = t.value.register.errorUserNotFound
+      } else {
+        error.value = t.value.register.errorInvalidCredentials
+      }
+    } else {
+      error.value = t.value.register.errorInvalidCredentials
+    }
   } finally {
     loading.value = false
   }

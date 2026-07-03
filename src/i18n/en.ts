@@ -23,6 +23,7 @@ export default {
     loginTitle: 'Sign in',
     loginSubmit: 'Sign in',
     errorInvalidCredentials: 'Invalid email or password',
+    errorUserNotFound: 'User not found. Please register first.',
   },
 
   sidebar: {
@@ -79,6 +80,7 @@ export default {
     register: 'Register',
     errorName: 'Please enter your name',
     errorPassword: 'Password is too short',
+    errorUserNotFound: 'User not found. Please register first.',
   },
 
   input: {

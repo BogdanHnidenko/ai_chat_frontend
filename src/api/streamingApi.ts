@@ -3,6 +3,7 @@ import { useChatStore } from '@/stores/chatStore'
 import { useI18n } from '@/i18n'
 import type { MessageType } from '@/types'
 import { Chat, Message } from '@/api/API'
+import { getToken, getUserId } from '@/utils/cookies'
 const apiChat = new Chat
 const apiMessage = new Message
 
@@ -23,17 +24,23 @@ export function stopStreaming(): void {
 interface FetchStreamOptions {
   chatId: string
   message: string
+  aiMsgId: string
   signal: AbortSignal
 }
 
-async function *fetchStream({ chatId, message, signal }: FetchStreamOptions): AsyncGenerator<string> {
+async function *fetchStream({ chatId, message, aiMsgId, signal }: FetchStreamOptions): AsyncGenerator<string> {
   const auth = useAuthStore()
   const url = `${BASE_URL}/api/message/${chatId}/stream`
 
+  const token = getToken()
+  const userId = getUserId()
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', Accept: 'text/event-stream' }
+  if (token) headers.Authorization = token
+
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-    body: JSON.stringify({ isDemo: auth.isGuest, message }),
+    headers,
+    body: JSON.stringify({ isDemo: auth.isGuest, message, userId, aiMsgId }),
     signal,
   })
 
@@ -57,13 +64,6 @@ async function *fetchStream({ chatId, message, signal }: FetchStreamOptions): As
       if (data === '[DONE]') return
       try {
         const parsed = JSON.parse(data)
-        // Title update event from server after first message
-        if (parsed && typeof parsed === 'object' && parsed.__type === 'title') {
-          const chatStore = useChatStore()
-          const chat = chatStore.chats.find(c => c.id === chatId)
-          if (chat) chat.title = parsed.title
-          continue
-        }
         if (parsed) yield parsed
       } catch {
         if (data) yield data
@@ -82,8 +82,10 @@ const createNewChatAndMessage = async (message: string) => {
 
   const pendingChat = chatStore.pendingChat
   let sendChunk = false
+  let isFirstMessage = false
 
   if (pendingChat?.id === chatId) {
+    isFirstMessage = true
     if (auth.isGuest) {
       chatStore.createChatFromPending(pendingChat)
       sendChunk = true
@@ -150,11 +152,26 @@ const createNewChatAndMessage = async (message: string) => {
   const aiMessage = messages.find(m => m.role === 'ai')
   const aiMessageId = aiMessage?.id || ""
 
-  return { chatId, aiMessageId, sendChunk }
+  return { chatId, aiMessageId, sendChunk, isFirstMessage }
+}
+
+async function requestChatTitle(chatId: string, message: string, aiMessageId: string) {
+  const chatStore = useChatStore()
+
+  const aiMsg = chatStore.activeMessages.find(m => m.id === aiMessageId)
+  if (!aiMsg?.content) return
+
+  try {
+    const res = await apiChat.generateTitle(chatId, message, aiMsg.content) as any
+    const title = res?.title
+    if (!title) return
+    chatStore.setChatTitle(chatId, title)
+  } catch {
+    // Keep the default title if generation fails
+  }
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────
-
 export interface StreamOptions {
   message: string
 }
@@ -163,7 +180,7 @@ export async function streamChatMessage({ message }: StreamOptions): Promise<voi
   const chatStore = useChatStore()
   const { t } = useI18n()
 
-  const { chatId, aiMessageId, sendChunk } = await createNewChatAndMessage(message)
+  const { chatId, aiMessageId, sendChunk, isFirstMessage } = await createNewChatAndMessage(message)
 
   if (!sendChunk) return
 
@@ -171,7 +188,7 @@ export async function streamChatMessage({ message }: StreamOptions): Promise<voi
   chatStore.setStreaming(true)
 
   try {
-    for await (const chunk of fetchStream({ chatId, message, signal: _abortController.signal })) {
+    for await (const chunk of fetchStream({ chatId, message, aiMsgId: aiMessageId, signal: _abortController.signal })) {
       const msg = chatStore.activeMessages.find(m => m.id === aiMessageId)
       if (msg) msg.isTyping = false
       chatStore.appendStreamChunk(chatId, aiMessageId, chunk)
@@ -189,5 +206,9 @@ export async function streamChatMessage({ message }: StreamOptions): Promise<voi
   } finally {
     chatStore.setStreaming(false)
     _abortController = null
+  }
+
+  if (isFirstMessage) {
+    requestChatTitle(chatId, message, aiMessageId)
   }
 }

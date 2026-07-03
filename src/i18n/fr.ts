@@ -23,6 +23,7 @@ export default {
     loginTitle: 'Connexion',
     loginSubmit: 'Se connecter',
     errorInvalidCredentials: 'E-mail ou mot de passe invalide',
+    errorUserNotFound: 'Utilisateur introuvable. Veuillez d\'abord vous inscrire.',
   },
 
   sidebar: {
@@ -79,6 +80,7 @@ export default {
     register: "S'inscrire",
     errorName: 'Veuillez entrer votre nom',
     errorPassword: 'Mot de passe trop court',
+    errorUserNotFound: "Utilisateur introuvable. Veuillez d'abord vous inscrire.",
   },
 
   input: {

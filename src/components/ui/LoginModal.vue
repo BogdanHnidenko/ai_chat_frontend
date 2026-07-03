@@ -43,6 +43,7 @@ import { useI18n } from '@/i18n'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import { login } from '@/modules/auth'
 import getStart from '@/modules/getStart'
+import { API_ERRORS } from '@/helpers/apiErrors'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
@@ -57,9 +58,17 @@ const error = ref('')
 
 async function submit() {
   error.value = ''
-  await login({ email: email.value.trim(), password: password.value })
-  await getStart()
-  emit('update:modelValue', false)
+  try {
+    await login({ email: email.value.trim(), password: password.value })
+    await getStart()
+    emit('update:modelValue', false)
+  } catch (e: any) {
+    if (e?.message === API_ERRORS.USER_NOT_FOUND) {
+      error.value = t.value.loginModal.errorUserNotFound
+    } else {
+      error.value = t.value.register.errorInvalidCredentials
+    }
+  }
 }
 
 function goRegister() {

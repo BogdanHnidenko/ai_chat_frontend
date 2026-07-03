@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getToken, getUserId, removeToken, removeUserId } from '@/utils/cookies'
+import { API_ERRORS } from '@/helpers/apiErrors'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
@@ -26,18 +27,18 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (response) => {
     const data = response.data as any
-    if (data?.status === 'error' && data?.error === 'no auth') {
+    if (data?.status === 'error' && data?.error === API_ERRORS.NO_AUTH) {
       handleAuthError()
-      return Promise.reject(new Error('no auth'))
+      return Promise.reject(new Error(API_ERRORS.NO_AUTH))
     } else if(data?.status !== 'done') {
-      return Promise.reject()
+      return Promise.reject(new Error(data?.error ?? 'unknown_error'))
     }
     return response.data?.data as any
   },
   (error) => {
     const errorRes = error?.response
     const errorResData = errorRes?.data
-    if (errorRes?.status === 401 || (errorResData?.status === 'error' && errorResData?.error === 'no auth')) {
+    if (errorResData?.status === 'error' && errorResData?.error === API_ERRORS.NO_AUTH) {
       handleAuthError()
     }
     return Promise.reject(error)
@@ -106,6 +107,9 @@ export class Chat {
   }
   renameChat(id: string, title: string) {
     return http.put<unknown[]>(`/api/chats/${id}`, { title })
+  }
+  generateTitle(id: string, message: string, reply: string) {
+    return http.post<unknown[]>(`/api/chats/${id}/title`, { message, reply })
   }
   deleteChat(id: string) {
     return http.delete<unknown[]>(`/api/chats/${id}`)
