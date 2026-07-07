@@ -1,8 +1,7 @@
 import axios from 'axios'
 import { getToken, getUserId, removeToken, removeUserId } from '@/utils/cookies'
 import { API_ERRORS } from '@/helpers/apiErrors'
-
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+import { BASE_URL } from '@/utils/apiUrl'
 
 
 export const http = axios.create({

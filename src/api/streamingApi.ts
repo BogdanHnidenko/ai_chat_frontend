@@ -4,10 +4,9 @@ import { useI18n } from '@/i18n'
 import type { MessageType } from '@/types'
 import { Chat, Message } from '@/api/API'
 import { getToken, getUserId } from '@/utils/cookies'
+import { BASE_URL } from '@/utils/apiUrl'
 const apiChat = new Chat
 const apiMessage = new Message
-
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
 
 // ── AbortController for stream cancellation ────────────────────────────────
