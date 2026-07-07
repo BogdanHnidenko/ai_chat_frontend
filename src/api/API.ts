@@ -27,12 +27,15 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
   (response) => {
     const data = response.data as any
-    if (data?.status === 'error' && data?.error === API_ERRORS.NO_AUTH) {
-      handleAuthError()
-      return Promise.reject(new Error(API_ERRORS.NO_AUTH))
-    } else if(data?.status !== 'done') {
-      return Promise.reject(new Error(data?.error ?? 'unknown_error'))
+    if(response.status !== 204 && response.status !== 205) {
+      if (data?.status === 'error' && data?.error === API_ERRORS.NO_AUTH) {
+        handleAuthError()
+        return Promise.reject(new Error(API_ERRORS.NO_AUTH))
+      } else if(data?.status !== 'done') {
+        return Promise.reject(new Error(data?.error ?? 'unknown_error'))
+      }
     }
+
     return response.data?.data as any
   },
   (error) => {
@@ -108,8 +111,8 @@ export class Chat {
   renameChat(id: string, title: string) {
     return http.put<unknown[]>(`/api/chats/${id}`, { title })
   }
-  generateTitle(id: string, message: string, reply: string) {
-    return http.post<unknown[]>(`/api/chats/${id}/title`, { message, reply })
+  generateTitle(id: string) {
+    return http.post<unknown[]>(`/api/chats/${id}/title`)
   }
   deleteChat(id: string) {
     return http.delete<unknown[]>(`/api/chats/${id}`)
