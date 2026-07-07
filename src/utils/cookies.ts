@@ -4,7 +4,7 @@ const USER_COOKIE = 'auth_user'
 
 // ------ Працюємо з токеном -----------
 export function updateToken(token: string) {
-  Cookies.set(TOKEN_COOKIE, token, { expires: 30, sameSite: 'Strict' })
+  Cookies.set(TOKEN_COOKIE, token, { expires: 30, sameSite: 'Lax', secure: location.protocol === 'https:' })
 }
 export function getToken(): string | undefined {
   return Cookies.get(TOKEN_COOKIE)
@@ -14,7 +14,7 @@ export function removeToken() {
 }
 // ------ Працюємо з userId -----------
 export function updateUserId(userId: string) {
-  Cookies.set(USER_COOKIE, userId, { expires: 30, sameSite: 'Strict' })
+  Cookies.set(USER_COOKIE, userId, { expires: 30, sameSite: 'Lax', secure: location.protocol === 'https:' })
 }
 export function getUserId(): string | undefined {
   return Cookies.get(USER_COOKIE)
