@@ -117,9 +117,6 @@ export const useChatStore = defineStore('chat', {
         return
       }
 
-      const activeChat = this.chats.find(c => c.id === this.activeChatId)
-      if (activeChat) return
-
       const chat: ChatType = {
         id: crypto.randomUUID(),
         title: getChatLabels().newChatTitle,
