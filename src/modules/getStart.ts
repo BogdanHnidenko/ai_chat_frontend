@@ -45,6 +45,7 @@ export default async () => {
     setCurrentData(auth, chatStore, presetStore, response)
     router.replace('/chats')
   } catch (error) {
+    console.log('Error fetching start data:', error)
     if (!auth.isLoggedIn) return
     auth.logout()
     router.replace('/welcome')
