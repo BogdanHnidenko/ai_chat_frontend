@@ -162,7 +162,7 @@ async function requestChatTitle(chatId: string, message: string, aiMessageId: st
   if (!aiMsg?.content) return
 
   try {
-    const res = await apiChat.generateTitle(chatId, message, aiMsg.content) as any
+    const res = await apiChat.generateTitle(chatId) as any
     const title = res?.title
     if (!title) return
     chatStore.setChatTitle(chatId, title)

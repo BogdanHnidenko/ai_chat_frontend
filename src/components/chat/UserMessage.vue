@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Message } from '@/types'
-defineProps<{ message: Message; index: number }>()
+import type { MessageType } from '@/types'
+defineProps<{ message: MessageType; index: number }>()
 </script>
 
 <style scoped>
