@@ -78,7 +78,7 @@ async function send() {
 
 <style scoped>
 .input-area {
-  padding: 12px 24px 16px;
+  padding: 12px 24px calc(16px + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--divider);

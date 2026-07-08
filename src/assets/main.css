@@ -42,6 +42,8 @@
 
 html, body, #app {
   height: 100%;
+  height: -webkit-fill-available;
+  height: 100dvh;
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
