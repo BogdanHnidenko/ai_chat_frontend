@@ -17,6 +17,8 @@ import TopBar from './TopBar.vue'
 .layout {
   display: flex;
   height: 100vh;
+  height: -webkit-fill-available;
+  height: 100dvh;
   overflow: hidden;
   background: var(--bg);
 }

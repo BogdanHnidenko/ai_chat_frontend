@@ -33,6 +33,14 @@
     />
   </aside>
 
+  <Transition name="fade">
+    <div
+      v-if="sidebarOpen"
+      class="sidebar-overlay"
+      @click="ui.toggleSidebar"
+    />
+  </Transition>
+
   <SearchModal v-model="searchOpen" />
   <DemoLimitModal
     v-model="demoNewChatOpen"
@@ -210,5 +218,39 @@ function startResize(e: MouseEvent) {
 .resize-handle:hover,
 .resize-handle:active {
   background: var(--accent-mid, rgba(139, 92, 246, 0.4));
+}
+
+/* ── Overlay (mobile) ────────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+}
+
+/* ── Mobile: sidebar overlays content instead of pushing it ── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    max-width: 85vw;
+    z-index: 100;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
 }
 </style>
